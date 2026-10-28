@@ -46,7 +46,13 @@ export default function OfficerRadar({
             Designated Officer Radar
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Jurisdiction: <strong>Tahsil Revenue Office (Haveli / Bengaluru South)</strong> • Enforcing Statutory RTS Deadlines
+            Jurisdiction: <strong>
+              {selectedState === 'KA' 
+                ? 'Nadakacheri & Taluk Office (Bengaluru South / Mysore) • Karnataka Sakala Act 2011' 
+                : selectedState === 'DL'
+                ? 'Sub-Divisional Office & Food Civil Supplies (New Delhi) • Delhi e-SLA 2011'
+                : 'Tahsil Revenue Office (Haveli / Pune Division) • Maharashtra RTS Act 2015'}
+            </strong>
           </p>
         </div>
 

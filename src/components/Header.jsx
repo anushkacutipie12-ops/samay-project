@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, ShieldCheck, Sparkles, Key, Globe, Building2, Map, FileCode, User } from 'lucide-react';
+import { Clock, ShieldCheck, Sparkles, Key, Globe, Building2, Map, FileCode, User, Layers, WifiOff } from 'lucide-react';
 
 export default function Header({
   activeTab,
@@ -22,7 +22,7 @@ export default function Header({
         <div className="flex items-center justify-between h-16">
           
           {/* Logo & Slogan */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('citizen')}>
+          <div className="flex items-center space-x-3 cursor-pointer select-none" onClick={() => setActiveTab('citizen')}>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-700 to-indigo-900 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
               <Clock className="w-5 h-5 text-amber-400 animate-spin-slow" />
             </div>
@@ -41,25 +41,25 @@ export default function Header({
             </div>
           </div>
 
-          {/* Center Navigation Tabs */}
-          <nav className="flex items-center space-x-1 sm:space-x-2 bg-slate-100/80 p-1 rounded-xl border border-slate-200">
+          {/* Center Navigation Tabs (5 Tabs) */}
+          <nav className="flex items-center space-x-1 bg-slate-100/90 p-1 rounded-xl border border-slate-200 overflow-x-auto">
             <button
               onClick={() => setActiveTab('citizen')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'citizen'
-                  ? 'bg-white text-blue-700 shadow-sm'
+                  ? 'bg-white text-blue-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <User className="w-3.5 h-3.5" />
-              <span>Citizen & Helper</span>
+              <span>Citizen &amp; Helper</span>
             </button>
 
             <button
               onClick={() => setActiveTab('officer')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all relative ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap relative ${
                 activeTab === 'officer'
-                  ? 'bg-white text-blue-700 shadow-sm'
+                  ? 'bg-white text-blue-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -70,9 +70,9 @@ export default function Header({
 
             <button
               onClick={() => setActiveTab('commission')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'commission'
-                  ? 'bg-white text-blue-700 shadow-sm'
+                  ? 'bg-white text-blue-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -82,9 +82,9 @@ export default function Header({
 
             <button
               onClick={() => setActiveTab('compiler')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'compiler'
-                  ? 'bg-white text-indigo-700 shadow-sm'
+                  ? 'bg-white text-indigo-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -92,16 +92,28 @@ export default function Header({
               <span>Rights Compiler</span>
               <span className="text-[9px] bg-indigo-100 text-indigo-700 px-1 rounded font-bold">AI</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab('protocol')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'protocol'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                  : 'text-slate-600 hover:text-amber-800'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-amber-900" />
+              <span>UPI for Rights</span>
+            </button>
           </nav>
 
-          {/* Right Controls: State, Lang, Hash Proof, API Key */}
+          {/* Right Controls: State, Lang, Offline Badge, Hash Proof, API Key */}
           <div className="flex items-center space-x-2">
             
             {/* State Switcher */}
             <select
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
-              className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+              className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs cursor-pointer"
             >
               <option value="MH">Maharashtra (Aaple Sarkar)</option>
               <option value="KA">Karnataka (Sakala)</option>
@@ -112,7 +124,7 @@ export default function Header({
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="hidden lg:block text-xs font-medium bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+              className="hidden lg:block text-xs font-medium bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs cursor-pointer"
             >
               <option value="en">English (EN)</option>
               <option value="mr">मराठी (MR)</option>
@@ -120,11 +132,20 @@ export default function Header({
               <option value="hi">हिंदी (HI)</option>
             </select>
 
+            {/* Offline-Ready Badge */}
+            <span
+              title="Runs 100% Offline with pure deterministic non-LLM code clock"
+              className="hidden xl:inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-[10px] font-bold"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>Offline Ready</span>
+            </span>
+
             {/* Cryptographic Hash Chain Badge */}
             <button
               onClick={onOpenAuditModal}
               title="Verified Hash-Chained Audit Log"
-              className="flex items-center space-x-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors"
+              className="flex items-center space-x-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
               <span className="font-mono text-[11px] font-bold">{auditCount} Blks</span>
@@ -134,7 +155,7 @@ export default function Header({
             <button
               onClick={onOpenApiKeyModal}
               title="Gemini AI Settings"
-              className={`p-2 rounded-lg border transition-colors ${
+              className={`p-2 rounded-lg border transition-colors cursor-pointer ${
                 hasApiKey
                   ? 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100'
                   : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'

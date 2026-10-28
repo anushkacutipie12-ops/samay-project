@@ -4,6 +4,8 @@ import CitizenView from './components/CitizenView.jsx';
 import OfficerRadar from './components/OfficerRadar.jsx';
 import CommissionMap from './components/CommissionMap.jsx';
 import RightsCompiler from './components/RightsCompiler.jsx';
+import ProtocolView from './components/ProtocolView.jsx';
+import TimeWarpDock from './components/TimeWarpDock.jsx';
 import AppealModal from './components/AppealModal.jsx';
 import AuditChainModal from './components/AuditChainModal.jsx';
 import ApiKeyModal from './components/ApiKeyModal.jsx';
@@ -14,7 +16,7 @@ import { computeLegalClock } from './engine/clockEngine.js';
 import { AuditLogChain } from './engine/auditLog.js';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('citizen'); // 'citizen' | 'officer' | 'commission' | 'compiler'
+  const [activeTab, setActiveTab] = useState('citizen'); // 'citizen' | 'officer' | 'commission' | 'compiler' | 'protocol'
   const [selectedState, setSelectedState] = useState('MH');
   const [language, setLanguage] = useState('en');
   
@@ -27,6 +29,9 @@ export default function App() {
   // Cryptographic Audit Chain
   const [auditChain] = useState(() => new AuditLogChain());
   const [auditCount, setAuditCount] = useState(1);
+
+  // Global Time Warp Offset (in days) for live hackathon presentation
+  const [globalOffset, setGlobalOffset] = useState(0);
 
   // Active tracked applications
   const [applications, setApplications] = useState(() => {
@@ -63,16 +68,47 @@ export default function App() {
     setAuditCount(auditChain.chain.length);
   };
 
+  // Recompute all application clocks when globalOffset changes
+  const handleSetGlobalOffset = (newOffset) => {
+    setGlobalOffset(newOffset);
+    setApplications(prev => prev.map(app => {
+      const totalOffset = (app.daysOffset || 0) + newOffset;
+      const refDate = new Date();
+      refDate.setDate(refDate.getDate() + totalOffset);
+
+      const updatedClock = computeLegalClock({
+        submissionDate: app.submission_date,
+        deadlineDays: app.statutory_sla_days || app.rule?.deadline_days || 15,
+        deadlineType: app.rule?.deadline_type || 'working_days',
+        stateCode: app.state_code,
+        pauses: app.pauses,
+        referenceDate: refDate,
+        penaltyPerDay: app.rule?.penalty_per_day,
+        maxPenalty: app.rule?.max_penalty
+      });
+
+      return {
+        ...app,
+        clock: updatedClock
+      };
+    }));
+  };
+
   // Add newly scanned slip
   const handleAddApplication = async (slipData) => {
     const rule = rules.find(r => r.service_id === slipData.service_id || r.service_name === slipData.service_name) || rules[0];
+    
+    const refDate = new Date();
+    refDate.setDate(refDate.getDate() + globalOffset);
+
     const clock = computeLegalClock({
       submissionDate: slipData.submission_date,
       deadlineDays: rule.deadline_days,
       deadlineType: rule.deadline_type,
       stateCode: slipData.state_code || selectedState,
       penaltyPerDay: rule.penalty_per_day,
-      maxPenalty: rule.max_penalty
+      maxPenalty: rule.max_penalty,
+      referenceDate: refDate
     });
 
     const newApp = {
@@ -131,6 +167,10 @@ export default function App() {
         });
       }
 
+      const totalOffset = (app.daysOffset || 0) + globalOffset;
+      const refDate = new Date();
+      refDate.setDate(refDate.getDate() + totalOffset);
+
       // Recompute clock with updated pauses
       const updatedClock = computeLegalClock({
         submissionDate: app.submission_date,
@@ -139,7 +179,8 @@ export default function App() {
         stateCode: app.state_code,
         pauses: updatedPauses,
         penaltyPerDay: app.rule?.penalty_per_day,
-        maxPenalty: app.rule?.max_penalty
+        maxPenalty: app.rule?.max_penalty,
+        referenceDate: refDate
       });
 
       return {
@@ -156,14 +197,14 @@ export default function App() {
     refreshAuditCount();
   };
 
-  // Fast forward simulator (+5 days) for hackathon live demo
+  // Fast forward individual slip (+5 days) for hackathon demo
   const handleFastForwardApplication = async (appId) => {
     setApplications(prev => prev.map(app => {
       if (app.id !== appId) return app;
 
       const newOffset = (app.daysOffset || 0) + 5;
       const refDate = new Date();
-      refDate.setDate(refDate.getDate() + newOffset);
+      refDate.setDate(refDate.getDate() + newOffset + globalOffset);
 
       const updatedClock = computeLegalClock({
         submissionDate: app.submission_date,
@@ -246,6 +287,7 @@ export default function App() {
             onAddApplication={handleAddApplication}
             onOpenAppealModal={(app) => setAppealModalApp(app)}
             onFastForwardApplication={handleFastForwardApplication}
+            selectedState={selectedState}
             apiKey={apiKey}
             language={language}
           />
@@ -271,9 +313,24 @@ export default function App() {
             onAddRule={handleAddRule}
             existingRules={rules}
             apiKey={apiKey}
+            selectedState={selectedState}
+          />
+        )}
+
+        {activeTab === 'protocol' && (
+          <ProtocolView
+            rules={rules}
+            selectedState={selectedState}
           />
         )}
       </main>
+
+      {/* Persistent Time-Warp Dock for Live Demos */}
+      <TimeWarpDock
+        currentOffset={globalOffset}
+        onSetOffset={handleSetGlobalOffset}
+        onReset={() => handleSetGlobalOffset(0)}
+      />
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">

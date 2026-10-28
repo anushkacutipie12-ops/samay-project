@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileCode, Sparkles, CheckCircle2, ShieldCheck, ArrowRight, RefreshCw, Copy, Check, Eye } from 'lucide-react';
 import { compileNotifiedListWithAI } from '../services/aiServices.js';
 import { sha256 } from '../engine/auditLog.js';
@@ -63,14 +63,27 @@ Statutory Compensatory Delay Fine: Rs. 20 per day up to Rs. 500 under Section 8 
 export default function RightsCompiler({
   onAddRule,
   existingRules,
-  apiKey
+  apiKey,
+  selectedState = "DL"
 }) {
-  const [inputText, setInputText] = useState(SAMPLE_GAZETTES[0].text);
-  const [selectedStateCode, setSelectedStateCode] = useState("DL");
+  const defaultSample = SAMPLE_GAZETTES.find(s => s.stateCode === selectedState) || SAMPLE_GAZETTES[0];
+  const [inputText, setInputText] = useState(defaultSample.text);
+  const [selectedStateCode, setSelectedStateCode] = useState(defaultSample.stateCode);
   const [isCompiling, setIsCompiling] = useState(false);
   const [compiledResult, setCompiledResult] = useState(null);
   const [approvedSuccess, setApprovedSuccess] = useState(false);
   const [viewJson, setViewJson] = useState(false);
+
+  // Sync with selectedState if changed
+  useEffect(() => {
+    const match = SAMPLE_GAZETTES.find(s => s.stateCode === selectedState);
+    if (match) {
+      setInputText(match.text);
+      setSelectedStateCode(match.stateCode);
+      setCompiledResult(null);
+      setApprovedSuccess(false);
+    }
+  }, [selectedState]);
 
   const handleSelectSample = (sample) => {
     setInputText(sample.text);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Send, Printer, Share2, CheckCircle2, ShieldCheck, Download, AlertCircle, ArrowLeft } from 'lucide-react';
+import { FileText, Send, Printer, Share2, CheckCircle2, ShieldCheck, Download, AlertCircle, ArrowLeft, MessageSquare, Copy, Check, Mail, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { draftStatutoryAppeal } from '../services/aiServices.js';
 
@@ -15,6 +15,8 @@ export default function AppealModal({
   const [appealDoc, setAppealDoc] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [copiedWhatsApp, setCopiedWhatsApp] = useState(false);
+  const [activeTab, setActiveTab] = useState('form1'); // 'form1' | 'whatsapp' | 'speedpost'
 
   useEffect(() => {
     async function loadDraft() {
@@ -39,15 +41,49 @@ export default function AppealModal({
 
       // Trigger celebratory confetti
       confetti({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 120,
+        spread: 80,
         origin: { y: 0.6 }
       });
-    }, 800);
+    }, 700);
   };
 
   const handlePrint = () => {
     window.print();
+  };
+
+  // WhatsApp formatted notice
+  const getWhatsAppNoticeText = () => {
+    if (!appealDoc) return "";
+    return `🚨 *STATUTORY FIRST APPEAL FILED* 🚨
+*Under:* ${appealDoc.addressedTo.stateAct}
+*Case Reference:* ${appealDoc.appealNumber}
+
+*Appellant:* ${appealDoc.appellant.name}
+*Application ID:* ${appealDoc.statutoryFacts.applicationNo}
+*Service:* ${appealDoc.statutoryFacts.serviceName}
+*Statutory SLA:* ${appealDoc.statutoryFacts.stipulatedPeriod} (Expired on ${appealDoc.statutoryFacts.statutoryExpiryDate})
+*Working Days Overdue:* +${appealDoc.statutoryFacts.workingDaysDelayed} Days
+*Defaulting Officer:* ${appealDoc.respondent.title}
+
+*Statutory Claims:*
+1. Peremptory delivery of service within 48 hours.
+2. Attachment of accrued penalty of *${appealDoc.statutoryFacts.accumulatedPenalty}* from officer monthly salary under statutory formula.
+
+_Transmitted via SAMAY Digital Rights Protocol_
+Verification Hash: ${application.id}-SHA256`;
+  };
+
+  const handleCopyWhatsApp = () => {
+    const text = getWhatsAppNoticeText();
+    navigator.clipboard.writeText(text);
+    setCopiedWhatsApp(true);
+    setTimeout(() => setCopiedWhatsApp(false), 2000);
+  };
+
+  const handleOpenWhatsAppWeb = () => {
+    const text = encodeURIComponent(getWhatsAppNoticeText());
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
 
   if (!appealDoc) {
@@ -82,13 +118,45 @@ export default function AppealModal({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white font-bold p-1 text-base"
+            className="text-slate-400 hover:text-white font-bold p-1 text-base cursor-pointer"
           >
             ✕
           </button>
         </div>
 
-        {/* Modal Body / Legal Appeal Preview */}
+        {/* Tab Navigator: Form 1 vs WhatsApp Notice vs SpeedPost */}
+        {!isSubmitted && (
+          <div className="flex items-center space-x-1 bg-slate-100 p-2 border-b border-slate-200 text-xs font-semibold">
+            <button
+              onClick={() => setActiveTab('form1')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                activeTab === 'form1' ? 'bg-white text-blue-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Statutory Form 1 Memo
+            </button>
+            <button
+              onClick={() => setActiveTab('whatsapp')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                activeTab === 'whatsapp' ? 'bg-emerald-600 text-white shadow-xs' : 'text-emerald-700 hover:bg-emerald-50'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>WhatsApp Legal Notice</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('speedpost')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                activeTab === 'speedpost' ? 'bg-amber-600 text-white shadow-xs' : 'text-amber-800 hover:bg-amber-50'
+              }`}
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>SpeedPost e-Receipt</span>
+            </button>
+          </div>
+        )}
+
+        {/* Modal Body */}
         <div className="overflow-y-auto p-6 space-y-5 text-xs text-slate-800 flex-1 font-sans">
           
           {isSubmitted ? (
@@ -98,7 +166,7 @@ export default function AppealModal({
               </div>
               <div>
                 <h4 className="text-xl font-black text-slate-900">
-                  First Appeal Lodged & Transmitted!
+                  First Appeal Lodged &amp; Transmitted!
                 </h4>
                 <p className="text-xs text-slate-500 mt-1">
                   Appeal Reference ID: <strong className="font-mono text-blue-700">{appealDoc.appealNumber}</strong>
@@ -126,23 +194,92 @@ export default function AppealModal({
 
               <div className="pt-4 flex justify-center space-x-3">
                 <button
+                  onClick={handleOpenWhatsAppWeb}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-xs flex items-center space-x-1.5 shadow-sm cursor-pointer"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>Send on WhatsApp</span>
+                </button>
+                <button
                   onClick={handlePrint}
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-50 rounded-xl font-semibold text-xs flex items-center space-x-1.5"
+                  className="px-4 py-2 border border-slate-300 hover:bg-slate-50 rounded-xl font-semibold text-xs flex items-center space-x-1.5 cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5 text-slate-600" />
                   <span>Print Formal Copy</span>
                 </button>
                 <button
                   onClick={onClose}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs cursor-pointer"
                 >
                   Return to Dashboard
                 </button>
               </div>
             </div>
+          ) : activeTab === 'whatsapp' ? (
+            /* WhatsApp Notice Preview */
+            <div className="space-y-4">
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 flex items-center justify-between">
+                <div>
+                  <span className="font-bold block">WhatsApp Legal Notice Dispatcher</span>
+                  <span className="text-[11px] text-emerald-700">Pre-formatted statutory message ready for instant WhatsApp dispatch.</span>
+                </div>
+                <button
+                  onClick={handleCopyWhatsApp}
+                  className="flex items-center space-x-1 bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-lg font-bold text-xs shadow-xs cursor-pointer"
+                >
+                  {copiedWhatsApp ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedWhatsApp ? "Copied" : "Copy Text"}</span>
+                </button>
+              </div>
+
+              {/* Chat Bubble Rendering */}
+              <div className="bg-[#e5ddd5] p-4 rounded-2xl shadow-inner max-w-lg mx-auto">
+                <div className="bg-white rounded-2xl p-4 shadow-sm space-y-2 font-sans text-xs border border-slate-200 text-slate-800 whitespace-pre-line leading-relaxed">
+                  {getWhatsAppNoticeText()}
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={handleOpenWhatsAppWeb}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center space-x-2 shadow-sm cursor-pointer"
+                >
+                  <span>Open WhatsApp Web / Send Notice</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ) : activeTab === 'speedpost' ? (
+            /* SpeedPost e-Notice */
+            <div className="space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-amber-900">
+                <span className="font-bold block">Official Indian Postal Service (SpeedPost Dispatch)</span>
+                <span className="text-[11px] text-amber-700">Formal legal proof of physical delivery to the Sub-Divisional Officer.</span>
+              </div>
+
+              <div className="bg-white border-2 border-slate-800 rounded-xl p-5 space-y-3 font-mono text-xs">
+                <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                  <span className="font-black text-sm uppercase">INDIAN POST - SPEED POST</span>
+                  <span className="text-[11px] font-bold text-blue-700">BARCODE: EM892109284IN</span>
+                </div>
+
+                <div className="space-y-1 text-[11px]">
+                  <p><strong>To:</strong> {appealDoc.addressedTo.title}</p>
+                  <p><strong>Office:</strong> Sub-Divisional Office (SDO), {appealDoc.addressedTo.jurisdiction}</p>
+                  <p><strong>From:</strong> {appealDoc.appellant.name}, {appealDoc.appellant.address}</p>
+                  <p><strong>Article Type:</strong> Statutory Form 1 RTS Appeal Memo</p>
+                  <p><strong>Date &amp; Time:</strong> {appealDoc.date}, 11:30 AM</p>
+                </div>
+
+                <div className="pt-2 border-t border-dashed border-slate-300 flex justify-between items-center text-[10px] text-slate-500">
+                  <span>Track at www.indiapost.gov.in</span>
+                  <span className="font-bold text-emerald-700">STATUS: READY FOR TRANSMISSION</span>
+                </div>
+              </div>
+            </div>
           ) : (
+            /* Standard Form 1 Legal Banner */
             <>
-              {/* Form 1 Legal Banner */}
               <div className="border-b-2 border-slate-900 pb-3 text-center space-y-1">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 block">
                   STATUTORY APPEAL FORM 1
@@ -223,7 +360,7 @@ export default function AppealModal({
               {/* Relief Claimed & Statutory Penalty */}
               <div className="space-y-1.5">
                 <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider text-blue-900">
-                  3. Relief Sought & Statutory Penalty Demand
+                  3. Relief Sought &amp; Statutory Penalty Demand
                 </h4>
                 <div className="bg-rose-50/70 border border-rose-200 rounded-xl p-3 text-[11px] text-rose-900 space-y-1">
                   {appealDoc.reliefSought.map((r, idx) => (
@@ -250,7 +387,7 @@ export default function AppealModal({
           <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
             <button
               onClick={handlePrint}
-              className="px-3.5 py-2 border border-slate-300 hover:bg-white text-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-1.5 shadow-xs"
+              className="px-3.5 py-2 border border-slate-300 hover:bg-white text-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-1.5 shadow-xs cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print / Save PDF</span>
@@ -259,14 +396,14 @@ export default function AppealModal({
             <div className="flex items-center space-x-2">
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-xl text-xs font-semibold"
+                className="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-xl text-xs font-semibold cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleTransmit}
                 disabled={isSubmitting}
-                className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold rounded-xl text-xs flex items-center space-x-2 shadow-lg shadow-blue-500/25 transition-all"
+                className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold rounded-xl text-xs flex items-center space-x-2 shadow-lg shadow-blue-500/25 transition-all cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{isSubmitting ? "Transmitting..." : "One-Tap Transmit to SDO"}</span>

@@ -29,17 +29,17 @@ flowchart LR
     B --> C["Human Legal Signoff"]
     C --> D[("Open Rule Registry (CPSV-AP)")]
     
-    E["Paper Slip / Acknowledgment"] --> F["Slip Capture (AI OCR)"]
-    F --> G["Deterministic Clock Engine (Code)"]
+    E["Paper Slip / Acknowledgment"] --> F["Optical Scanner HUD (AI OCR)"]
+    F --> G["Deterministic Clock Engine (Pure Code)"]
     D --> G
     
     G --> H{"SLA Status"}
-    H -- "Day 0-10 (Green)" --> I["Citizen Calm Update"]
-    H -- "Day 10-15 (Amber)" --> J["Officer Radar Alert"]
-    H -- "Day 15+ (Red)" --> K["One-Tap First Appeal + Salary Penalty Claim"]
+    H -- "Day 0-10 (Green)" --> I["Citizen Calm Update + TTS Audio"]
+    H -- "Day 10-15 (Amber)" --> J["Officer Radar Urgency Alert"]
+    H -- "Day 15+ (Red)" --> K["One-Tap First Appeal + Salary Deduction Claim"]
     
     G --> L[("SHA-256 Hash Chained Audit Log")]
-    L --> M["Commission Accountability Map"]
+    L --> M["Commission SVG Accountability Map"]
 ```
 
 ### 1. Rights Compiler (LLM-Assisted, Human-in-the-Loop)
@@ -48,17 +48,17 @@ flowchart LR
   - `service_id`, `service_name`, `department`, `deadline_days`, `deadline_type`, `designated_officer`, `first_appellate_authority`, `penalty_per_day`, `max_penalty`, `appeal_statute_section`.
 - **Human-in-the-loop guarantee:** Every rule requires verification and SHA-256 hash signing before committing to the registry.
 
-### 2. Slip Capture (AI OCR for Paper Applications)
-- 89% of citizens apply via Seva Kendras, CSCs, or taluk offices and receive a paper receipt.
-- Helper or citizen snaps a photo of the slip.
-- AI extracts: Application ID, Citizen Name, Service Name, Submission Date, District, and Issuing Authority.
+### 2. Optical Scanner HUD with Live Bounding Boxes (Paper Applications)
+- **89% of citizens apply via Seva Kendras, CSCs, or taluk offices and receive a paper receipt.**
+- Helper or citizen photographs the receipt.
+- High-tech scanner viewfinder with animated laser line and real-time bounding box extraction for Application ID, Citizen Name, Service Name, Submission Date, District, and Designated Officer with editable verification before clock initialization.
 
 ### 3. Deterministic Legal Clock Engine (Pure Code, Never an LLM)
-- **As Slide 4 mandates: *“The deadline is computed by code, never by an LLM.”***
+- **As mandated: *“The deadline is computed by code, never by an LLM.”***
 - Computes working days excluding:
   - All Sundays.
   - 2nd and 4th Saturdays (standard Indian state administrative off days).
-  - Official state gazetted holidays (e.g., Chhatrapati Shivaji Maharaj Jayanti, Maharashtra Day, Basava Jayanti, Ambedkar Jayanti).
+  - Official state gazetted holidays (e.g., Chhatrapati Shivaji Maharaj Jayanti, Maharashtra Day, Basava Jayanti, Karnataka Rajyotsava, Ambedkar Jayanti).
   - **Statutory Pauses:** If the officer raises a legitimate document defect query, the legal clock pauses deterministically and resumes upon citizen response.
 - Computes dynamic status:
   - 🟢 **Day 0–10 (On Time):** Within safe SLA limits.
@@ -70,19 +70,33 @@ flowchart LR
 - Visual warning before deadlines breach to protect officers from personal salary penalties.
 - One-click actions: "Issue Certificate", "Raise Query (Pauses Clock)", "Resume Clock".
 
-### 5. One-Tap First Appeal Drafter
-- At breach, synthesizes a legally binding **Statutory Form 1 First Appeal** under **Section 18 of Maharashtra RTS Act 2015** or **Section 8 of Karnataka Sakala Act 2011**.
+### 5. One-Tap First Appeal Drafter & Multi-Channel Dispatcher
+- Synthesizes a legally binding **Statutory Form 1 First Appeal** under **Section 18 of Maharashtra RTS Act 2015** or **Section 8 of Karnataka Sakala Act 2011**.
 - Pre-addressed to the exact First Appellate Authority (e.g. SDO).
 - Includes statutory prayer for:
   1. Delivery of service within 48 hours.
   2. Recovery of accrued statutory penalty from the default officer's monthly salary.
   3. Disciplinary entry in the officer's Annual Confidential Report (ACR).
+- **WhatsApp Statutory Notice Dispatcher:** Formatted message with 1-click WhatsApp transmission.
+- **SpeedPost e-Receipt:** Formal Postal Article tracking slip with barcode.
 
 ### 6. Commission Accountability Map & Dashboard
-- State RTS Commission heatmap across 36 districts of Maharashtra and 31 districts of Karnataka.
+- Interactive SVG Geo-Choropleth map across districts of Maharashtra and Karnataka.
 - Live CAG audit comparison tracking late disposal rates, pending backlogs, and total statutory penalties accrued.
+- **Form 3 Salary Deduction Order Generator:** Official statutory order directing Treasury Officers to attach defaulting officer salaries.
 
-### 7. Cryptographic Hash-Chained Audit Log
+### 7. The Protocol: UPI for Rights
+- Dedicated interactive architecture screen illustrating the DPI protocol layer.
+- Open CPSV-AP schema explorer and interactive REST API playground (`/api/clock/calculate`, `/api/rules`, `/api/appeals/draft`, `/api/audit/chain`).
+
+### 8. Village Helper / CSC Kiosk (VLE Mode) & Audio TTS
+- Specialized mode for Village Level Entrepreneurs (VLEs) managing rural common service centers.
+- Multi-lingual Text-To-Speech (Web Speech API) speaking in Marathi, Kannada, Hindi, and English so non-literate citizens can listen to their legal rights!
+
+### 9. Global Time-Warp Live Presentation Dock
+- Floating presentation controller allowing presenters to jump time: `Day 0`, `+3d`, `+7d (Amber Radar)`, `+15d (Statutory Breach)` to demonstrate the entire RTS lifecycle in 30 seconds!
+
+### 10. Cryptographic Hash-Chained Audit Log
 - Genesis block linked to state RTS framework.
 - Every slip registration, clock tick, pause, breach, and appeal submission generates a block chained via SHA-256:  
   `Hash = SHA-256(index + timestamp + previousHash + eventType + payload)`
@@ -96,7 +110,8 @@ flowchart LR
 |---|---|
 | **Frontend** | React 18, Vite, Tailwind CSS, Lucide Icons, Canvas Confetti (PWA-ready) |
 | **Backend** | Node.js, Express, CORS, Dotenv, Crypto |
-| **Clock Engine** | Deterministic business day & gazetted holiday calculator |
+| **Clock Engine** | Pure Code Deterministic business day, holiday & statutory pause calculator |
+| **Speech / Accessibility** | Web SpeechSynthesis API (Marathi, Kannada, Hindi, English) |
 | **AI / LLM** | Google Gemini API (with 100% offline-resilient heuristic fallback) |
 | **Data / Schema** | Open CPSV-AP-inspired JSON schema, SHA-256 Hash Chain |
 
@@ -128,28 +143,37 @@ The full application (frontend + REST API) will be running at **`http://localhos
 
 ---
 
-## 🧪 Interactive Hackathon Demo Highlights
+## 🧪 Interactive Hackathon Demo Highlights (3-Minute Winning Pitch Script)
 
-1. **Slide 2 Case Study (Farmer's Daughter):**
-   - Click **"MahaOnline Income Certificate"** in the preset slips.
-   - See the circular clock gauge immediately flag **Day 19 / 15 (Breached by 4 days)**.
-   - Statutory penalty accrued: **₹1,000** (at ₹250/day).
-   - Click 🚨 **"One-Tap First Appeal"** to preview the pre-addressed Form 1 appeal to the SDO with confetti celebration upon transmission!
+1. **Step 1: The Human Problem (Slide 1 & 2):**
+   - Citizen View: *"The law promised her 15 days. Nobody told her she could appeal."*
+   - Toggle to **"Village Helper / CSC Kiosk (VLE Mode)"** to highlight that 89% of rural Indians apply via paper receipts.
+   - Click the **"Listen"** button on Savita Shinde's slip to hear the voice announcer speak aloud in Marathi / Kannada / Hindi!
 
-2. **Time-Warp Simulator (+5 Days):**
-   - Click the **"+5 Days"** button on any application card to watch an on-track application dynamically shift from Green (On Time) ➔ Amber (At Risk) ➔ Red (Breached)!
+2. **Step 2: Paper Slip Ingestion with Scanner HUD (Slide 4):**
+   - Click any preset or upload a receipt to open the **Optical Scanner Viewfinder HUD**.
+   - Watch the animated laser scan sweep over the receipt and see green bounding boxes extract Application ID, Citizen Name, Service, and Designated Officer.
+   - Click **"Verify & Start Legal Clock"** to see pure-code non-LLM computation.
 
-3. **Officer Radar Triage:**
-   - Switch to the **Officer Radar** tab.
-   - Click **"Raise Query (Pause)"** on an active application to see the legal clock pause deterministically with reason code.
-   - Click **"Resume Clock"** to see it resume.
+3. **Step 3: The Time-Warp Demo Dock:**
+   - Use the floating **Time-Warp Dock** at the bottom right.
+   - Click **"+7d"**: Watch on-track applications shift to Amber (`AT RISK`) and trigger warnings on the **Officer Radar**!
+   - Click **"+15d"**: Watch deadlines breach into Red (`BREACHED`) with ₹1,000+ statutory daily penalties accumulating!
 
-4. **Live Addition of 3rd State (Delhi e-SLA):**
-   - Switch to **Rights Compiler**.
-   - Select **"Delhi e-SLA Gazette"** preset.
-   - Click **"Compile to Schema with AI"** to see the open CPSV-AP record generated.
-   - Click **"Approve & Sign Rule to Registry"** to witness live cross-state scaling!
+4. **Step 4: Department Radar & Clock Pauses:**
+   - Switch to **Officer Radar**.
+   - Click **"Raise Query (Pause)"** on an active application: enter a deficiency reason to demonstrate how the legal clock pauses deterministically and resumes upon citizen response!
 
-5. **Tamper-Proof Audit Chain:**
-   - Click the **"Blks"** badge in the header.
-   - Click **"Verify Chain Integrity"** to verify cryptographic SHA-256 proof across all blocks.
+5. **Step 5: One-Tap First Appeal & WhatsApp Notice:**
+   - Click **"One-Tap First Appeal"** on a breached case.
+   - Preview the pre-addressed **Statutory Form 1 Memo** citing Section 18 / Section 8 with a prayer for officer salary deduction.
+   - Toggle to **"WhatsApp Legal Notice"** to preview the WhatsApp-ready statutory dispatch with 1-click sharing!
+   - Click **"Transmit to SDO"** to see celebratory confetti and SHA-256 block registration!
+
+6. **Step 6: Commission SVG Heatmap & Salary Deduction Order:**
+   - Switch to **Commission Map**.
+   - Explore the interactive SVG choropleth map for Maharashtra or Karnataka. Hover over districts to inspect real-time SLA compliance, breached cases, and penalty liabilities.
+   - Click **"Section 18 Salary Deduction Order"** to view the generated statutory order to the State Treasury!
+
+7. **Step 7: UPI for Rights (The Protocol):**
+   - Switch to **UPI for Rights** to show the architectural parallel between NPCI UPI and SAMAY, view the CPSV-AP schema, and execute live REST API endpoints right in the browser!
